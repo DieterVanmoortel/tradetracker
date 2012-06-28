@@ -1,0 +1,81 @@
+<?php
+include_once('tradetracker.variable.inc');
+/*
+ * Implements hook_permission
+ */
+function tradetracker_permission(){
+    return array(
+    'administer tradetracker' => array(
+      'title' => t('Administer tradetracker'),
+    ),
+  );
+}
+/**
+ * Implementing hook_menu
+ */
+function tradetracker_menu(){
+    $items['tradetracker'] = array(
+    'page callback' => '_tradetracker_callback',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+/**
+ * Implements hook_block_info().
+ */
+function tradetracker_block_info() {
+  $blocks = array();
+  $blocks['tradetracker_img'] = array(
+    'info' => t('Tradetracker 1px image'),
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function tradetracker_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'tradetracker_img':
+      $block['content'] = build_tradetracker_image();
+      break;
+  }
+  return $block;
+}
+
+/*
+ * Callback for /tradetracker ( or the custom url? )
+ */
+function _tradetracker_callback(){
+ $file = drupal_get_path('module', 'tradetracker') . '/tradetracker_index.php';
+ include_once($file);
+}
+
+/*
+ * Building the tradetracker 1px img
+ */
+function build_tradetracker_image(){
+  // should reorganise this the drupal way.. 
+  global $base_url;
+  $campaignId = variable_get_value('tt_campaignid');
+  $productId = variable_get_value('tt_productid');
+  $convType = variable_get_value('tt_convtype');
+  $https = variable_get_value('tt_https');
+  $transactionId = variable_get_value('tt_tid');
+  $transactionAmount = variable_get_value('tt_tamount');
+  $email = variable_get_value('tt_email');
+  $merchant = variable_get_value('tt_merchant');
+  $affiliate = variable_get_value('tt_affiliate');
+  $img = '<img src="'.$base_url.'/'.drupal_get_path('module', 'feature_site') . '/tradetracker/conversion.php';
+  $img .= '?campaignID=' . $campaignId . '&productID=' . $productId;
+  $img .= 'conversionType='. $convType .'&https=' . $https . '&transactionID='. $transactionId;
+  if(!empty($transactionAmount)) { $img .= '&transactionAmount=' . $transactionAmount;}
+  if(!empty($email)) { $img .= '&email=' . $email;}
+  if(!empty($merchant)) { $img .= '&descrMerchant=' . $merchant;}
+  if(!empty($affiliate)) { $img .= '&descrAffiliate=' . $affiliate;}
+  $img .= '" width="1" height="1" border="0" alt="" />';
+  return $img;
+}
